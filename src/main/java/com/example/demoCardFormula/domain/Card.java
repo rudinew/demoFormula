@@ -43,6 +43,7 @@ public class Card extends BaseEntity {
     private String description;
     /*вік на дату документа Document.dt_confirm */
  //,  insert="false" update="false"
+
     @Formula("(select IFNULL(DATEDIFF(Document.dt_confirm , birth_dt), 0) from Document where Document.id = document_id )")
     private int ageOnDtConfirm;
 
@@ -65,6 +66,10 @@ public class Card extends BaseEntity {
     public int getAgeOnDtConfirm() {
         return ageOnDtConfirm;
     }
+////вмкористовую лише при PUT коли return
+  /*  public void setAgeOnDtConfirm(int ageOnDtConfirm) {
+        this.ageOnDtConfirm = ageOnDtConfirm;
+    }*/
 
 
     //Вік на будь-яку дату dateTo

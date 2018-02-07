@@ -19,7 +19,6 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/docs")
-
 public class DocReceptionController  {
     @Autowired
     DocumentService documentService;
@@ -80,16 +79,8 @@ public class DocReceptionController  {
                                    @PathVariable("id") Long id,
                                    @RequestBody Document document,
                                    HttpServletRequest request, HttpServletResponse response) {
-        Document documentEdit = this.documentService.getDocumentByOne(document.getId());
-
-
-            //TODO: delete rows
-            documentEdit = documentService.changeDocumentAndCards(document);
-
-
-            return documentEdit;
-
-
+        Document documentEdit = documentService.changeDocumentAndCards(document);
+        return documentEdit;
     }
 
     /**

@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +20,20 @@ import java.util.List;
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
-
+ /*https://stackoverflow.com/questions/48641052/hibernate-formula-returns-an-old-value-in-put-response/48658569?noredirect=1#comment84321132_48658569*/
+    @PersistenceContext
+    private EntityManager em;
 
     @Autowired
     DocumentRepository documentRepository;
     @Autowired
     CardRepository cardRepository;
+
+    /*https://stackoverflow.com/questions/48641052/hibernate-formula-returns-an-old-value-in-put-response/48658569?noredirect=1#comment84321132_48658569*/
+    @Transactional
+    public void refreshEntity(Object entity) {
+        em.refresh(entity);
+    }
 
 
     @Override
@@ -83,10 +93,6 @@ public class DocumentServiceImpl implements DocumentService {
     public Document addDocumentAndCards(Document document) {
 
         List<Card> cards = document.getCards();
-        ///doctype - pryhid
-
-
-
         Document documentNew = addDocument(document);
         if (!cards.isEmpty()) {
             for (Card card : cards) {
@@ -122,7 +128,9 @@ public class DocumentServiceImpl implements DocumentService {
         documentEdit.setDtConfirm(document.getDtConfirm());
         documentEdit.setDescription(document.getDescription());
 
-        documentRepository.saveAndFlush(documentEdit);
+       /* documentRepository.saveAndFlush(documentEdit);
+        return documentEdit;*/
+        documentEdit = documentRepository.saveAndFlush(documentEdit);
         return documentEdit;
     }
 
@@ -134,7 +142,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (card.isNew()){
             card.setDocument(document);
             //TODO: ВІК
-           // objectDoc.setAge(objectDoc.getAge());
+            card.setBirthDt(card.getAgeOnDtConfirm());
             //System.out.println("vik");
             document.setCard(card);
             cardRepository.saveAndFlush(card);
@@ -147,16 +155,17 @@ public class DocumentServiceImpl implements DocumentService {
                 cardEdit.setName(card.getName());
                 cardEdit.setUnit(card.getUnit());
                 cardEdit.setQuantity1(card.getQuantity1());
-                cardEdit.setBirthDt(card.getBirthDt());
+                //cardEdit.setBirthDt(card.getBirthDt());
                 //TODO: ВІК
-               // objectDocEdit.setBirthDt(objectDoc.getAgeOnDtConfirm());
-
+                cardEdit.setBirthDt(card.getAgeOnDtConfirm());
                 cardEdit.setDescription(card.getDescription());
                 cardRepository.saveAndFlush(cardEdit);
-
+                 /*https://stackoverflow.com/questions/48641052/hibernate-formula-returns-an-old-value-in-put-response/48658569?noredirect=1#comment84321132_48658569*/
+                refreshEntity(cardEdit);
 
 
             }
+
 
         }
 
@@ -180,6 +189,7 @@ public class DocumentServiceImpl implements DocumentService {
             for (Card card : cards) {
                 //System.out.println(objectDoc.getMatObject().getName());
                 changeCard(documentEdit, card);
+
             }
         }
          //повернути змінену дет частину
